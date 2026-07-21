@@ -27,15 +27,17 @@ export function useCommunicationLogs() {
   const [logsByClient, setLogsByClient] = useState<Record<string, CommunicationLog[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const subscribedRef = useRef(false);
+  const commChannelIdRef = useRef(0);
 
   /* Real-time subscription — listen to all visible communication_logs */
   useEffect(() => {
-    if (!isAuthenticated || !user || subscribedRef.current) return;
-    subscribedRef.current = true;
+    if (!isAuthenticated || !user) return;
+
+    commChannelIdRef.current += 1;
+    const channelName = `comm-logs-realtime-${commChannelIdRef.current}-${Date.now()}`;
 
     const channel = supabase
-      .channel('comm-logs-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -77,7 +79,6 @@ export function useCommunicationLogs() {
 
     return () => {
       supabase.removeChannel(channel);
-      subscribedRef.current = false;
     };
   }, [isAuthenticated, user]);
 

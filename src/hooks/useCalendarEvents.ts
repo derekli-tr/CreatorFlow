@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { eventTypeConfig } from '@/constants/eventTypes';
@@ -67,11 +67,15 @@ export function useCalendarEvents() {
   }, [fetchEvents]);
 
   /* Real-time subscription */
+  const calChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
+    calChannelIdRef.current += 1;
+    const channelName = `calendar-events-realtime-${calChannelIdRef.current}-${Date.now()}`;
+
     const channel = supabase
-      .channel('calendar-events-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

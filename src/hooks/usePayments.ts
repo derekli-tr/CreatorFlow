@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -57,11 +57,15 @@ export function usePayments() {
   useEffect(() => { fetchPayments(); }, [fetchPayments]);
 
   /* Real-time subscription — RLS handles scoping since payments table has no owner_id */
+  const payChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
+    payChannelIdRef.current += 1;
+    const channelName = `payments-realtime-${payChannelIdRef.current}-${Date.now()}`;
+
     const channel = supabase
-      .channel('payments-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

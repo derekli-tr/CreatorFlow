@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -96,11 +96,15 @@ export function useInvoices() {
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
 
   /* Real-time subscription */
+  const invChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
+    invChannelIdRef.current += 1;
+    const channelName = `invoices-realtime-${invChannelIdRef.current}-${Date.now()}`;
+
     const channel = supabase
-      .channel('invoices-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

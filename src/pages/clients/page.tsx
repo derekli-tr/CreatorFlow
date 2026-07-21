@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useClients } from "@/hooks/useClients";
 import { useProjects } from "@/hooks/useProjects";
 import { useInvoices } from "@/hooks/useInvoices";
+import AddClientModal from "./components/AddClientModal";
 
 type SortKey = "name" | "company" | "revenue" | "last_contacted";
 type SortDir = "asc" | "desc";
@@ -14,7 +15,8 @@ const statusConfig: Record<string, { label: string; bg: string; color: string }>
 };
 
 export default function ClientsPage() {
-  const { clients, isLoading, error, fetchClients } = useClients();
+  const { clients, isLoading, error, fetchClients, createClient } = useClients();
+  const [showAddModal, setShowAddModal] = useState(false);
   const { projects } = useProjects();
   const { invoices } = useInvoices();
   const [search, setSearch] = useState("");
@@ -139,7 +141,10 @@ export default function ClientsPage() {
             {clients.filter((c) => c.status === "lead").length} lead
           </p>
         </div>
-        <button className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors cursor-pointer whitespace-nowrap">
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors cursor-pointer whitespace-nowrap"
+        >
           <span className="w-4 h-4 flex items-center justify-center">
             <i className="ri-add-line" />
           </span>
@@ -356,6 +361,12 @@ export default function ClientsPage() {
           </table>
         </div>
       </div>
+
+      <AddClientModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSave={createClient}
+      />
     </div>
   );
 }

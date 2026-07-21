@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import type { Proposal, ProposalSection, PricingLineItem, TimelinePhase } from '@/types/proposals';
@@ -131,11 +131,15 @@ export function useProposals() {
   }, [fetchProposals]);
 
   /* Real-time subscription */
+  const propChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
+    propChannelIdRef.current += 1;
+    const channelName = `proposals-realtime-${propChannelIdRef.current}-${Date.now()}`;
+
     const channel = supabase
-      .channel('proposals-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

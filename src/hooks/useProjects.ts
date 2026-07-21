@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -88,8 +88,12 @@ export function useProjects() {
   }, [fetchProjects]);
 
   /* Real-time subscription */
+  const projChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user) return;
+
+    projChannelIdRef.current += 1;
+    const channelName = `projects-realtime-${projChannelIdRef.current}-${Date.now()}`;
 
     const resolveClientName = async (clientId: string): Promise<string> => {
       const { data } = await supabase
@@ -101,7 +105,7 @@ export function useProjects() {
     };
 
     const channel = supabase
-      .channel('projects-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

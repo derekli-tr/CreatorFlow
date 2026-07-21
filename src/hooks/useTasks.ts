@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -73,11 +73,15 @@ export function useTasks(projectId: string) {
   }, [fetchTasks]);
 
   /* Real-time subscription */
+  const taskChannelIdRef = useRef(0);
   useEffect(() => {
     if (!isAuthenticated || !user || !projectId) return;
 
+    taskChannelIdRef.current += 1;
+    const channelName = `tasks-realtime-${projectId}-${taskChannelIdRef.current}-${Date.now()}`;
+
     const channel = supabase
-      .channel(`tasks-realtime-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
