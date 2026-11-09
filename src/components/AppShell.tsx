@@ -1,24 +1,12 @@
-import { useEffect } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import { useDealsStore } from "@/stores/dealsStore";
 
-const navItems = [
-  { label: "Dashboard", path: "/dashboard", icon: "ri-dashboard-line" },
-  { label: "Pipeline", path: "/pipeline", icon: "ri-layout-column-line" },
-  { label: "Analytics", path: "/analytics", icon: "ri-bar-chart-box-line" },
-];
+const navItems = [{ label: "Dashboard", path: "/dashboard", icon: "ri-dashboard-line" }];
 
 export default function AppShell() {
   const { user, isInitialized, logout } = useAuthStore();
-  const { fetchDeals, reset } = useDealsStore();
   const location = useLocation();
-
-  useEffect(() => {
-    if (user) fetchDeals();
-    else reset();
-  }, [user?.id, fetchDeals, reset]);
 
   if (!isInitialized) {
     return (

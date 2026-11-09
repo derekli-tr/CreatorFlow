@@ -6,7 +6,7 @@ interface StatCardProps {
   hint?: string;
   icon: string;
   testId?: string;
-  /** "warning" highlights the hint, e.g. when payments are overdue. */
+  /** "warning" highlights the hint. */
   tone?: "warning";
 }
 
